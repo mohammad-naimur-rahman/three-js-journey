@@ -3,6 +3,57 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 /**
+ * Textures
+ */
+// const image = new Image()
+// const texture = new THREE.Texture(image)
+// image.onload = () => {
+//   texture.needsUpdate = true
+// }
+
+// image.src = '/textures/door/color.jpg'
+//-- Loading Manager
+const loadingManager = new THREE.LoadingManager()
+
+loadingManager.onStart = () => console.log('onStart')
+
+loadingManager.onLoaded = () => console.log('onLoaded')
+
+loadingManager.onProgress = () => console.log('onProgress')
+
+loadingManager.onError = () => console.log('onError')
+
+const textureLoader = new THREE.TextureLoader(loadingManager)
+const colorTexture = textureLoader.load(
+  '/textures/door/color.jpg'
+  // () => console.log('LOADED'),
+  // () => console.log('PROGRESS'),
+  // () => console.log('ERROR')
+)
+//const checkboxTexture = textureLoader.load('/textures/checkerboard-1024x1024.png')
+const lowQualityTexture = textureLoader.load('/textures/minecraft.png')
+const alphaTexture = textureLoader.load('/textures/door/alpha.jpg')
+const heightTexture = textureLoader.load('/textures/door/height.jpg')
+
+// colorTexture.repeat.x = 3
+// colorTexture.repeat.y = 3
+// //colorTexture.wrapS = THREE.RepeatWrapping
+// colorTexture.wrapS = THREE.MirroredRepeatWrapping
+// //colorTexture.wrapT = THREE.RepeatWrapping
+// colorTexture.wrapT = THREE.MirroredRepeatWrapping
+// colorTexture.offset.x = 0.5
+// colorTexture.offset.y = 0.5
+
+// colorTexture.rotation = Math.PI / 4
+
+// colorTexture.center.x = 0.5
+// colorTexture.center.y = 0.5
+
+//lowQualityTexture.generateMipmaps = false
+//colorTexture.minFilter = THREE.NearestFilter
+//lowQualityTexture.minFilter = THREE.NearestFilter
+lowQualityTexture.magFilter = THREE.NearestFilter
+/**
  * Base
  */
 // Canvas
@@ -15,7 +66,10 @@ const scene = new THREE.Scene()
  * Object
  */
 const geometry = new THREE.BoxBufferGeometry(1, 1, 1)
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
+// console.log(geometry.attributes.uv)
+//const material = new THREE.MeshBasicMaterial({ map: colorTexture })
+//const material = new THREE.MeshBasicMaterial({ map: checkboxTexture })
+const material = new THREE.MeshBasicMaterial({ map: lowQualityTexture })
 const mesh = new THREE.Mesh(geometry, material)
 scene.add(mesh)
 
@@ -23,23 +77,22 @@ scene.add(mesh)
  * Sizes
  */
 const sizes = {
-    width: window.innerWidth,
-    height: window.innerHeight
+  width: window.innerWidth,
+  height: window.innerHeight,
 }
 
-window.addEventListener('resize', () =>
-{
-    // Update sizes
-    sizes.width = window.innerWidth
-    sizes.height = window.innerHeight
+window.addEventListener('resize', () => {
+  // Update sizes
+  sizes.width = window.innerWidth
+  sizes.height = window.innerHeight
 
-    // Update camera
-    camera.aspect = sizes.width / sizes.height
-    camera.updateProjectionMatrix()
+  // Update camera
+  camera.aspect = sizes.width / sizes.height
+  camera.updateProjectionMatrix()
 
-    // Update renderer
-    renderer.setSize(sizes.width, sizes.height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  // Update renderer
+  renderer.setSize(sizes.width, sizes.height)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
 
 /**
@@ -60,7 +113,7 @@ controls.enableDamping = true
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
+  canvas: canvas,
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -70,18 +123,17 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  */
 const clock = new THREE.Clock()
 
-const tick = () =>
-{
-    const elapsedTime = clock.getElapsedTime()
+const tick = () => {
+  const elapsedTime = clock.getElapsedTime()
 
-    // Update controls
-    controls.update()
+  // Update controls
+  controls.update()
 
-    // Render
-    renderer.render(scene, camera)
+  // Render
+  renderer.render(scene, camera)
 
-    // Call tick again on the next frame
-    window.requestAnimationFrame(tick)
+  // Call tick again on the next frame
+  window.requestAnimationFrame(tick)
 }
 
 tick()
