@@ -1,6 +1,7 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { RectAreaLightHelper } from 'three/examples/jsm/helpers/RectAreaLightHelper'
 import * as dat from 'dat.gui'
 
 /**
@@ -18,15 +19,54 @@ const scene = new THREE.Scene()
 /**
  * Lights
  */
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+const ambientLight = new THREE.AmbientLight()
+ambientLight.color = new THREE.Color(0xffffff)
+ambientLight.intensity = 0.5
 scene.add(ambientLight)
 
-const pointLight = new THREE.PointLight(0xffffff, 0.5)
-pointLight.position.x = 2
-pointLight.position.y = 3
-pointLight.position.z = 4
-scene.add(pointLight)
+const directionalLight = new THREE.DirectionalLight(0x00fff8, 0.3)
+directionalLight.position.set(1, 1, 0)
+//scene.add(directionalLight)
 
+const hemisphereLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 1)
+//scene.add(hemisphereLight)
+
+gui.add(ambientLight, 'intensity').min(0).max(1).step(0.01).name('Ambient Light Intensity')
+
+const pointLight = new THREE.PointLight(0xffff00, 0.5, 3)
+pointLight.position.set(1, -0.5, 1)
+pointLight.lookAt(new THREE.Vector3(-1, 0, 0))
+//scene.add(pointLight)
+
+const rectAreaLight = new THREE.RectAreaLight(0x4c00ff, 5, 2, 2)
+rectAreaLight.position.set(1, 0, 0)
+scene.add(rectAreaLight)
+// (NOTE: RectAreaLight only workds with MeshStandardMaterial and MeshPhysicalMaterial)
+
+const spotLight = new THREE.SpotLight(0x78ff00, 0.5, 10, Math.PI * 0.15, 0.5, 1)
+spotLight.position.set(1, 2, 0)
+//scene.add(spotLight)
+
+spotLight.target.position.x = 0
+//scene.add(spotLight.target)
+
+// Helpers
+// const hemisphereLightHelper = new THREE.HemisphereLightHelper(hemisphereLight)
+// scene.add(hemisphereLightHelper)
+
+// const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight)
+// scene.add(directionalLightHelper)
+
+// const pointLightHelper = new THREE.PointLightHelper(pointLight)
+// scene.add(pointLightHelper)
+
+// const spotLightHelper = new THREE.SpotLightHelper(spotLight)
+// scene.add(spotLightHelper)
+
+const rectAreaLightHelper = new RectAreaLightHelper(rectAreaLight)
+scene.add(rectAreaLightHelper)
+
+gui.add(spotLight, 'distance').min(0).max(100).step(0.1)
 /**
  * Objects
  */
@@ -35,29 +75,17 @@ const material = new THREE.MeshStandardMaterial()
 material.roughness = 0.4
 
 // Objects
-const sphere = new THREE.Mesh(
-    new THREE.SphereBufferGeometry(0.5, 32, 32),
-    material
-)
-sphere.position.x = - 1.5
+const sphere = new THREE.Mesh(new THREE.SphereBufferGeometry(0.5, 32, 32), material)
+sphere.position.x = -1.5
 
-const cube = new THREE.Mesh(
-    new THREE.BoxBufferGeometry(0.75, 0.75, 0.75),
-    material
-)
+const cube = new THREE.Mesh(new THREE.BoxBufferGeometry(0.75, 0.75, 0.75), material)
 
-const torus = new THREE.Mesh(
-    new THREE.TorusBufferGeometry(0.3, 0.2, 32, 64),
-    material
-)
+const torus = new THREE.Mesh(new THREE.TorusBufferGeometry(0.3, 0.2, 32, 64), material)
 torus.position.x = 1.5
 
-const plane = new THREE.Mesh(
-    new THREE.PlaneBufferGeometry(5, 5),
-    material
-)
-plane.rotation.x = - Math.PI * 0.5
-plane.position.y = - 0.65
+const plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(5, 5), material)
+plane.rotation.x = -Math.PI * 0.5
+plane.position.y = -0.65
 
 scene.add(sphere, cube, torus, plane)
 
@@ -65,23 +93,22 @@ scene.add(sphere, cube, torus, plane)
  * Sizes
  */
 const sizes = {
-    width: window.innerWidth,
-    height: window.innerHeight
+  width: window.innerWidth,
+  height: window.innerHeight,
 }
 
-window.addEventListener('resize', () =>
-{
-    // Update sizes
-    sizes.width = window.innerWidth
-    sizes.height = window.innerHeight
+window.addEventListener('resize', () => {
+  // Update sizes
+  sizes.width = window.innerWidth
+  sizes.height = window.innerHeight
 
-    // Update camera
-    camera.aspect = sizes.width / sizes.height
-    camera.updateProjectionMatrix()
+  // Update camera
+  camera.aspect = sizes.width / sizes.height
+  camera.updateProjectionMatrix()
 
-    // Update renderer
-    renderer.setSize(sizes.width, sizes.height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  // Update renderer
+  renderer.setSize(sizes.width, sizes.height)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
 
 /**
@@ -102,7 +129,7 @@ controls.enableDamping = true
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
+  canvas: canvas,
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -112,27 +139,26 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  */
 const clock = new THREE.Clock()
 
-const tick = () =>
-{
-    const elapsedTime = clock.getElapsedTime()
+const tick = () => {
+  const elapsedTime = clock.getElapsedTime()
 
-    // Update objects
-    sphere.rotation.y = 0.1 * elapsedTime
-    cube.rotation.y = 0.1 * elapsedTime
-    torus.rotation.y = 0.1 * elapsedTime
+  // Update objects
+  sphere.rotation.y = 0.1 * elapsedTime
+  cube.rotation.y = 0.1 * elapsedTime
+  torus.rotation.y = 0.1 * elapsedTime
 
-    sphere.rotation.x = 0.15 * elapsedTime
-    cube.rotation.x = 0.15 * elapsedTime
-    torus.rotation.x = 0.15 * elapsedTime
+  sphere.rotation.x = 0.15 * elapsedTime
+  cube.rotation.x = 0.15 * elapsedTime
+  torus.rotation.x = 0.15 * elapsedTime
 
-    // Update controls
-    controls.update()
+  // Update controls
+  controls.update()
 
-    // Render
-    renderer.render(scene, camera)
+  // Render
+  renderer.render(scene, camera)
 
-    // Call tick again on the next frame
-    window.requestAnimationFrame(tick)
+  // Call tick again on the next frame
+  window.requestAnimationFrame(tick)
 }
 
 tick()
